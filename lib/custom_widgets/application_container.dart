@@ -26,7 +26,7 @@ Widget applicationContainer(title,VoidCallback onTap,{bool isDownload = false}){
         children: [
           SvgPicture.asset(kPdfImage,height: 32,width: 32,),
           SizedBox(width: 10.w,),
-          Text(title,style: AppStyles.blackTextStyle().copyWith(fontSize: 15.sp,fontWeight: FontWeight.w400,color: kGreyShade5Color),),
+          Text(title,style: AppStyles.blackTextStyle().copyWith(fontSize: 14.sp,fontWeight: FontWeight.w300,color: kGreyShade5Color),),
           isDownload == true ? SizedBox(width: 24.w,) : Spacer(),
           isDownload == true ? Image.asset(kDownloadIcon,height: 32.h,width: 32.w,) :
           CustomButton(title: "View", onTap: onTap,fontWeight: FontWeight.w400,textSize: 14.sp,width: 70.w,height: 32.h,color: kBlackColor.withOpacity(0.1),borderColor: kWhiteColor,borderRadius: 7,textColor: kBlackColor,)

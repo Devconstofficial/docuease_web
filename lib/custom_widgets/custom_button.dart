@@ -53,15 +53,15 @@ class CustomButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              icon != null
-                  ? Image.asset(
-                    icon!,
-                    height: 20.h,
-                    width: 20.w,
-                    color: iconColor,
-                  )
-                  : SizedBox.shrink(),
-              icon != null ? SizedBox(width: 6.w) : SizedBox.shrink(),
+              if (icon != null) ...[
+                Image.asset(
+                  icon!,
+                  height: 20.h,
+                  width: 20.w,
+                  color: iconColor,
+                ),
+                SizedBox(width: 6.w),
+              ],
               CustomText(
                 text: title,
                 fontSize: textSize,

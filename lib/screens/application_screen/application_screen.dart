@@ -4,6 +4,7 @@ import 'package:docuease_admin/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../custom_widgets/application_container.dart';
 import '../../custom_widgets/common_dialog.dart';
 import '../../custom_widgets/custom_button.dart';
@@ -68,7 +69,7 @@ class ApplicationScreen extends GetView<ApplicationController> {
 
   rejectionDialog(){
     return CommonDialog(
-        width: 360,
+        width: 360.w,
         widget: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,120 +91,94 @@ class ApplicationScreen extends GetView<ApplicationController> {
         ), title: "Rejection");
   }
 
-  workTypeDialog({bool isStatus = false}){
-    List<String> types = isStatus
-        ? ["Submitted", "Rejected", "In review", "Complected"]
-        : ["Copyright", "Design", "Business", "Text"];
-
-    return CommonDialog(
-        width: 360,
-        widget: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 22.h,),
-            Obx(() => Wrap(
-              spacing: 9.w,
-              runSpacing: 13.h,
-              children: List.generate(types.length, (index) {
-                bool isSelected = controller.selectedIndexes.contains(index);
-
-                return CustomButton(
-                  title: types[index],
-                  onTap: () {
-                    controller.toggleSelection(index);
-                  },
-                  height: 35.h,
-                  borderRadius: 6,
-                  textSize: 10,
-                  width: 92.w,
-                  textColor: isSelected ? kWhiteColor : kBlackColor,
-                  borderColor: isSelected ? kBlackColor : kBlackColor.withOpacity(0.05),
-                  color: isSelected ? kBlackColor : kBlackColor.withOpacity(0.05),
-                );
-              }),
-            )),
-            SizedBox(height: 68.h,),
-            CustomButton(title: "Apply Filter", onTap: (){
-              Get.back();
-            },height: 48.h,borderRadius: 16,textSize: 14,),
-          ],
-        ), title: isStatus ? "By Status" : "By Work type");
+  Widget customCheckbox(bool isSelected) {
+    return Container(
+      height: 14,
+      width: 14,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(
+          color: isSelected ? kPrimaryColor : kBlackColor.withOpacity(0.5),
+          width: 1,
+        ),
+        color: isSelected ? kPrimaryColor : Colors.transparent,
+      ),
+      child: isSelected
+          ? Icon(Icons.check, size: 10, color: kWhiteColor)
+          : null,
+    );
   }
 
-  byDate(){
+  byDate() {
+
+    Future<void> _pickDate(TextEditingController controller) async {
+      DateTime? picked = await showDatePicker(
+        context: Get.context!,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+      );
+      if (picked != null) {
+        controller.text = DateFormat('yyyy-MM-dd').format(picked);
+      }
+    }
+
     return CommonDialog(
-        width: 360,
-        widget: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 22.h,),
-            CustomTextField(hintText: "Start Date",prefixIcon: kCalenderIcon1,),
-            SizedBox(height: 19.h,),
-            CustomTextField(hintText: "End Date",prefixIcon: kCalenderIcon1,),
-            SizedBox(height: 36.h,),
-            CustomButton(title: "Apply Filter", onTap: (){
+      width: 360,
+      widget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 22.h),
+          CustomTextField(
+            controller: controller.startDateController,
+            hintText: "Start Date",
+            prefixIcon: kCalenderIcon1,
+            readOnly: true,
+            onTap: () => _pickDate(controller.startDateController),
+          ),
+          SizedBox(height: 19.h),
+          CustomTextField(
+            controller: controller.endDateController,
+            hintText: "End Date",
+            prefixIcon: kCalenderIcon1,
+            readOnly: true,
+            onTap: () => _pickDate(controller.endDateController),
+          ),
+          SizedBox(height: 36.h),
+          CustomButton(
+            title: "Apply Filter",
+            onTap: () {
               Get.back();
-            },height: 48.h,borderRadius: 12,textSize: 14,),
-          ],
-        ), title: "By Date");
+            },
+            height: 48.h,
+            borderRadius: 12,
+            textSize: 14,
+          ),
+        ],
+      ),
+      title: "By Date",
+    );
   }
 
-  byApplicant(){
+  approvedDialog(){
     return CommonDialog(
-        width: 360,
+        width: 360.w,
         widget: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 22.h,),
-            CustomTextField(
-              hintText: "Search Applicant...",
-              controller: controller.searchController,
-              onChanged: (value) {
-                controller.updateSearch(value);
-              },
-            ),
-            SizedBox(height: 27.h,),
             SizedBox(
-              height: 200.h,
-              width: Get.width,
-              child: Obx(() {
-                final results = controller.filteredApplicants;
-                if (results.isEmpty && controller.searchController.text.isNotEmpty) {
-                  return Center(child: Text("No results found"));
-                }
-                if (controller.searchController.text.isEmpty) {
-                  return Center(child: Text("Start typing to search"));
-                }
-                return SingleChildScrollView(
-                  child: Column(
-                    spacing: 15.h,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: results.map((name) {
-                      bool isSelected = controller.selectedApplicants.contains(name);
-                      return GestureDetector(
-                        onTap: () => Get.back(),
-                        child: Text(
-                          name,
-                          style: AppStyles.blackTextStyle().copyWith(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? kPrimaryColor : kBlackColor,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                );
-              }),
+              height: 179,
+              width: 207.w,
+              child: Image.asset(kSuccessImage,fit: BoxFit.contain,),
             ),
-            SizedBox(height: 39.h,),
-            CustomButton(title: "Apply Filter", onTap: (){
-              Get.back();
-            },height: 48.h,borderRadius: 12,textSize: 14,),
+            SizedBox(height: 24.h,),
+            Text("Application Approved!",style: AppStyles.blackTextStyle().copyWith(fontSize: 20,fontWeight: FontWeight.w500),textAlign: TextAlign.center,),
+            SizedBox(height: 12.h,),
+            Text("The application has been successfully reviewed and approved.",style: AppStyles.blackTextStyle().copyWith(fontSize: 16,fontWeight: FontWeight.w500),textAlign: TextAlign.center,),
+            SizedBox(height: 51.h,),
           ],
-        ), title: "By Applicant");
+        ), title: "",showTitle: true,);
   }
 
 
@@ -252,18 +227,306 @@ class ApplicationScreen extends GetView<ApplicationController> {
                                       borderRadius: 12,
                                     ),
                                   ),
-                                  CustomButton(title: "By date", onTap: (){
+                                  CustomButton(
+                                    title: "By date",
+                                    onTap: (){
                                     Get.dialog(byDate());
-                                  },height: 42,width: 116.w,icon: kFilterIcon,textSize: 12.sp,fontWeight: FontWeight.w500,color: kWhiteColor,textColor: kBlackColor,),
-                                  CustomButton(title: "By status", onTap: (){
-                                    Get.dialog(workTypeDialog(isStatus: true));
-                                  },height: 42,width: 116.w,icon: kFilterIcon,textSize: 12.sp,fontWeight: FontWeight.w500,color: kWhiteColor,textColor: kBlackColor),
-                                  CustomButton(title: "By applicant", onTap: (){
-                                    Get.dialog(byApplicant());
-                                  },height: 42,width: 142.w,icon: kFilterIcon,textSize: 12.sp,fontWeight: FontWeight.w500,color: kWhiteColor,textColor: kBlackColor),
-                                  CustomButton(title: "By work type", onTap: (){
-                                    Get.dialog(workTypeDialog());
-                                  },height: 42,width: 142.w,icon: kFilterIcon,textSize: 12.sp,fontWeight: FontWeight.w500,color: kWhiteColor,textColor: kBlackColor),
+                                  },
+                                    height: 42,
+                                    width: 116.w,
+                                    icon: kFilterIcon,
+                                    textSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: kWhiteColor,
+                                    textColor: kBlackColor,),
+                                  CustomButton(
+                                    title: "By Status",
+                                    key: controller.menuKey1,
+                                    onTap: () async {
+                                      final RenderBox button = controller.menuKey1.currentContext!.findRenderObject() as RenderBox;
+                                      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+                                      final Offset buttonPosition = button.localToGlobal(Offset.zero, ancestor: overlay);
+
+                                      final RelativeRect position = RelativeRect.fromLTRB(
+                                        buttonPosition.dx,
+                                        buttonPosition.dy + button.size.height + 6,
+                                        buttonPosition.dx + button.size.width,
+                                        buttonPosition.dy + button.size.height + 6,
+                                      );
+
+                                      final selected = await showMenu<String>(
+                                        color: kWhiteColor,
+                                        context: context,
+                                        position: position,
+                                        shape: OutlineInputBorder(
+                                            borderSide: BorderSide.none,
+                                            borderRadius: BorderRadius.circular(10)
+                                        ),
+                                        items: [
+                                          PopupMenuItem<String>(
+                                            enabled: false,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text('By Status',style: AppStyles.blackTextStyle().copyWith(fontSize: 12.sp,fontWeight: FontWeight.w500),),
+                                                MouseRegion(
+                                                  cursor: SystemMouseCursors.click,
+                                                  child: GestureDetector(
+                                                    onTap: (){
+                                                      Get.back();
+                                                    },
+                                                    child: Container(
+                                                      height: 20,
+                                                      width: 20,
+                                                      decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.circular(3),
+                                                          color: kGreyShade8Color,
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: kWhiteShade2Color.withOpacity(0.25),
+                                                              offset: Offset(0, 4),
+                                                              blurRadius: 22,
+                                                              spreadRadius: 0,
+                                                            )
+                                                          ]
+                                                      ),
+                                                      child: Center(child: Icon(Icons.close,color: kBlackColor,size: 12,)),
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          ...["Submitted", "Rejected", "In review", "Complected"].map((type) {
+                                            return PopupMenuItem<String>(
+                                              value: type,
+                                              child: Container(
+                                                width: 160.w,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.transparent,
+                                                    borderRadius: BorderRadius.circular(10)
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Obx(() {
+                                                      bool isSelected = controller.selectedWorkTypes.contains(type);
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          controller.toggleSelection(type);
+                                                        },
+                                                        child: customCheckbox(isSelected),
+                                                      );
+                                                    }),
+                                                    SizedBox(width: 4,),
+                                                    Text(type,style: AppStyles.blackTextStyle().copyWith(fontSize: 12,fontWeight: FontWeight.w300),),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ],
+                                      );
+
+                                      if (selected != null) {
+                                        controller.toggleSelection(selected);
+                                      }
+                                    },
+                                    width: 142.w,
+                                    height: 42,
+                                    icon: kFilterIcon,
+                                    textSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: kWhiteColor,
+                                    textColor: kBlackColor,
+                                  ),
+                                  CustomButton(
+                                    key: controller.applicantMenuKey,
+                                      title: "By applicant",
+                                      onTap: () async {
+                                        final RenderBox button = controller.applicantMenuKey.currentContext!.findRenderObject() as RenderBox;
+                                        final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+                                        final Offset buttonPosition = button.localToGlobal(Offset.zero, ancestor: overlay);
+
+                                        final RelativeRect position = RelativeRect.fromLTRB(
+                                          buttonPosition.dx,
+                                          buttonPosition.dy + button.size.height + 6,
+                                          buttonPosition.dx + button.size.width,
+                                          buttonPosition.dy + button.size.height + 6,
+                                        );
+
+                                        await showMenu<String>(
+                                          context: context,
+                                          position: position,
+                                          color: kWhiteColor,
+                                          items: [
+                                            PopupMenuItem<String>(
+                                              enabled: false,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  CustomTextField(
+                                                    hintText: "Search Applicant...",
+                                                    controller: controller.searchController,
+                                                    onChanged: (value) {
+                                                      controller.updateSearch(value);
+                                                    },
+                                                  ),
+                                                  SizedBox(height: 10.h),
+                                                  SizedBox(
+                                                    height: 200.h,
+                                                    width: Get.width,
+                                                    child: Obx(() {
+                                                      final results = controller.filteredApplicants;
+
+                                                      if (results.isEmpty && controller.searchController.text.isNotEmpty) {
+                                                        return Center(child: Text("No results found",style: AppStyles.blackTextStyle(),));
+                                                      }
+
+                                                      if (controller.searchController.text.isEmpty) {
+                                                        return Center(child: Text("Start typing to search",style: AppStyles.blackTextStyle(),));
+                                                      }
+
+                                                      return SingleChildScrollView(
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: results.map((name) {
+                                                            bool isSelected = controller.selectedApplicants.contains(name);
+                                                            return GestureDetector(
+                                                              onTap: () {
+                                                                controller.selectApplicant(name);
+                                                                Navigator.pop(context);
+                                                              },
+                                                              child: Container(
+                                                                width: Get.width,
+                                                                color: Colors.transparent,
+                                                                child: Padding(
+                                                                  padding: EdgeInsets.symmetric(vertical: 6.h),
+                                                                  child: Text(
+                                                                    name,
+                                                                    style: AppStyles.blackTextStyle().copyWith(
+                                                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                                                      color: isSelected ? kPrimaryColor : kBlackColor,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }).toList(),
+                                                        ),
+                                                      );
+                                                    }),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        );
+                                      },
+                                      height: 42,width: 142.w,icon: kFilterIcon,textSize: 12.sp,fontWeight: FontWeight.w500,color: kWhiteColor,textColor: kBlackColor),
+                                  CustomButton(
+                                    title: "By work type",
+                                    key: controller.menuKey,
+                                    onTap: () async {
+                                      final RenderBox button = controller.menuKey.currentContext!.findRenderObject() as RenderBox;
+                                      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+                                      final Offset buttonPosition = button.localToGlobal(Offset.zero, ancestor: overlay);
+
+                                      final RelativeRect position = RelativeRect.fromLTRB(
+                                        buttonPosition.dx,
+                                        buttonPosition.dy + button.size.height + 6,
+                                        buttonPosition.dx + button.size.width,
+                                        buttonPosition.dy + button.size.height + 6,
+                                      );
+
+                                      final selected = await showMenu<String>(
+                                        color: kWhiteColor,
+                                        context: context,
+                                        position: position,
+                                        shape: OutlineInputBorder(
+                                          borderSide: BorderSide.none,
+                                          borderRadius: BorderRadius.circular(10)
+                                        ),
+                                        items: [
+                                          PopupMenuItem<String>(
+                                            enabled: false,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text('By Work Type',style: AppStyles.blackTextStyle().copyWith(fontSize: 12.sp,fontWeight: FontWeight.w500),),
+                                                MouseRegion(
+                                                  cursor: SystemMouseCursors.click,
+                                                  child: GestureDetector(
+                                                    onTap: (){
+                                                      Get.back();
+                                                    },
+                                                    child: Container(
+                                                      height: 20,
+                                                      width: 20,
+                                                      decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.circular(3),
+                                                          color: kGreyShade8Color,
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: kWhiteShade2Color.withOpacity(0.25),
+                                                              offset: Offset(0, 4),
+                                                              blurRadius: 22,
+                                                              spreadRadius: 0,
+                                                            )
+                                                          ]
+                                                      ),
+                                                      child: Center(child: Icon(Icons.close,color: kBlackColor,size: 12,)),
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          ...["Copyright", "Design", "Business", "Other"].map((type) {
+                                            return PopupMenuItem<String>(
+                                              value: type,
+                                              child: Container(
+                                                width: 160.w,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.transparent,
+                                                  borderRadius: BorderRadius.circular(10)
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Obx(() {
+                                                      bool isSelected = controller.selectedWorkTypes.contains(type);
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          controller.toggleSelection(type);
+                                                        },
+                                                        child: customCheckbox(isSelected),
+                                                      );
+                                                    }),
+                                                    SizedBox(width: 4,),
+                                                    Text(type,style: AppStyles.blackTextStyle().copyWith(fontSize: 12,fontWeight: FontWeight.w300),),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ],
+                                      );
+
+                                      if (selected != null) {
+                                        controller.toggleSelection(selected);
+                                      }
+                                    },
+                                    width: 142.w,
+                                    height: 42,
+                                    icon: kFilterIcon,
+                                    textSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: kWhiteColor,
+                                    textColor: kBlackColor,
+                                  ),
                                   CustomButton(title: "Export CSV", onTap: (){},height: 42,width: 121.w,icon: kDownload2Icon,textSize: 12.sp,fontWeight: FontWeight.w500,)
                                 ],
                               ),
@@ -536,8 +799,9 @@ class ApplicationScreen extends GetView<ApplicationController> {
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
                             onTap: (){
-                              Get.dialog(viewDetails(isEdit: true));
-
+                              Get.dialog(approvedDialog());
+                              controller.applicants.remove(user);
+                              controller.applicants.refresh();
                             },
                             child: Image.asset(kCheck1Icon,height: 16,width: 16,))),
                     Container(

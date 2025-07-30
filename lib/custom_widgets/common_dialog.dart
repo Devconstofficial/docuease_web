@@ -10,12 +10,12 @@ class CommonDialog extends StatelessWidget {
   double? width;
   Widget widget;
   String title;
-  CommonDialog({super.key,this.width = 425,required this.widget,required this.title});
+  bool showTitle;
+  CommonDialog({super.key,this.width = 425,required this.widget,required this.title, this.showTitle = false});
 
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      // intentPadding: 425.w,
         widget: SizedBox(
           width: width,
           child: Padding(
@@ -24,8 +24,9 @@ class CommonDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: showTitle ? MainAxisAlignment.end :MainAxisAlignment.spaceBetween,
                   children: [
+                    if(!showTitle)
                     Text(title,style: AppStyles.blackTextStyle().copyWith(fontSize: 16.sp,fontWeight: FontWeight.w700),),
                     MouseRegion(
                       cursor: SystemMouseCursors.click,

@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../utils/app_images.dart';
 import '../../utils/app_styles.dart';
 import '../sidemenu/sidemenu.dart';
 
 class MeetingScreen extends GetView<MeetingsController> {
   const MeetingScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -40,23 +42,27 @@ class MeetingScreen extends GetView<MeetingsController> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  _arrowButton(Icons.arrow_back_ios),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 31.w),
-                                    child: Text(
-                                      "May 21 – 26, 2045",
-                                      style: AppStyles.blackTextStyle().copyWith(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w700,
+                                  Row(
+                                    children: [
+                                      _arrowButton(Icons.arrow_back_ios, onTap: controller.goToPreviousWeek),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 31.w),
+                                        child: Obx(() => Text(
+                                          controller.getFormattedDateRange(),
+                                          style: AppStyles.blackTextStyle().copyWith(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        )),
                                       ),
-                                    ),
+                                      _arrowButton(Icons.arrow_forward_ios_outlined, onTap: controller.goToNextWeek),
+                                    ],
                                   ),
-                                  _arrowButton(Icons.arrow_forward_ios_outlined),
                                 ],
                               ),
                               SizedBox(height: 54.h),
                               Obx(() {
-                                final items = controller.meetings;
+                                final items = controller.filteredMeetings;
                                 final rows = (items.length / 3).ceil();
 
                                 return Column(
@@ -76,11 +82,9 @@ class MeetingScreen extends GetView<MeetingsController> {
                                         children: rowItems.map((meeting) {
                                           return Expanded(
                                             child: Padding(
-                                              padding: EdgeInsets.only(
-                                                right: 23.w,
-                                              ),
+                                              padding: EdgeInsets.only(right: 23.w),
                                               child: meeting.containsKey("empty") && meeting["empty"] == "true"
-                                                  ? const SizedBox() // Empty space for equal width
+                                                  ? const SizedBox()
                                                   : _meetingCard(meeting),
                                             ),
                                           );
@@ -105,7 +109,10 @@ class MeetingScreen extends GetView<MeetingsController> {
     );
   }
 
-  Widget _meetingCard(Map<String, String> data) {
+  Widget _meetingCard(Map<String, dynamic> data) {
+    final DateTime meetingDate = data["date"];
+    final dateText = DateFormat('MMM d, yyyy').format(meetingDate);
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -131,7 +138,7 @@ class MeetingScreen extends GetView<MeetingsController> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    data["name"]!,
+                    data["name"],
                     style: AppStyles.blackTextStyle().copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
@@ -148,7 +155,7 @@ class MeetingScreen extends GetView<MeetingsController> {
                 SvgPicture.asset(kClockIcon, height: 24, width: 24),
                 SizedBox(width: 4.w),
                 Text(
-                  data["time"]!,
+                  data["time"],
                   style: AppStyles.blackTextStyle().copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -158,7 +165,7 @@ class MeetingScreen extends GetView<MeetingsController> {
                 SvgPicture.asset(kCalenderIcon1, height: 24, width: 24),
                 SizedBox(width: 4.w),
                 Text(
-                  data["date"]!,
+                  dateText,
                   style: AppStyles.blackTextStyle().copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -167,16 +174,13 @@ class MeetingScreen extends GetView<MeetingsController> {
               ],
             ),
             SizedBox(height: 11.h),
-            SizedBox(
-              height: 4 * 16,
-              child: Text(
-                data["desc"] ?? "",
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: AppStyles.blackTextStyle().copyWith(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
-                ),
+            Text(
+              data["desc"],
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: AppStyles.blackTextStyle().copyWith(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],
@@ -185,15 +189,22 @@ class MeetingScreen extends GetView<MeetingsController> {
     );
   }
 
-  Widget _arrowButton(IconData icon) {
-    return Container(
-      height: 40,
-      width: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: kBlackColor),
+  Widget _arrowButton(IconData icon, {required VoidCallback onTap}) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 40,
+          width: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(color: kBlackColor),
+          ),
+          child: Center(child: Icon(icon, size: 10)),
+        ),
       ),
-      child: Center(child: Icon(icon, size: 10)),
     );
   }
+
 }

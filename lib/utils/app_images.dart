@@ -44,3 +44,4 @@ String kPadImage = "$basePath/padImage.png";
 String kCardImage = "$basePath/card.png";
 String kFlagImage = "$basePath/flag.png";
 String kPdfImage = "$basePath/pdfImage.svg";
+String kSuccessImage = "$basePath/success.png";

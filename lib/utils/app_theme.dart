@@ -10,6 +10,7 @@ ThemeData buildTheme(brightness) {
     brightness: brightness,
     textTheme: GoogleFonts.interTextTheme(baseTheme.textTheme),
     timePickerTheme: TimePickerThemeData(backgroundColor: kWhiteColor),
+    datePickerTheme: DatePickerThemeData(backgroundColor: kWhiteColor),
     scaffoldBackgroundColor: kWhiteColor,
     appBarTheme: AppBarTheme(backgroundColor: kWhiteColor),
     colorScheme: ThemeData().colorScheme.copyWith(primary: kPrimaryColor),

@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 class ApplicationController extends GetxController {
   var searchController = TextEditingController();
+  TextEditingController startDateController = TextEditingController();
+  TextEditingController endDateController = TextEditingController();
 
   var applicants = [
     {
@@ -165,23 +167,28 @@ class ApplicationController extends GetxController {
 
   var selectedIndexes = <int>[].obs;
 
-  void toggleSelection(int index) {
-    if (selectedIndexes.contains(index)) {
-      selectedIndexes.remove(index);
+  RxList<String> selectedWorkTypes = <String>[].obs;
+
+  void clearSelection() {
+    selectedWorkTypes.clear();
+  }
+  void toggleSelection(String type) {
+    if (selectedWorkTypes.contains(type)) {
+      selectedWorkTypes.remove(type);
     } else {
-      selectedIndexes.add(index);
+      selectedWorkTypes.add(type);
     }
   }
+
+  final GlobalKey menuKey = GlobalKey();
+  final GlobalKey menuKey1 = GlobalKey();
+  final GlobalKey applicantMenuKey = GlobalKey();
 
   var selectedApplicants = [].obs;
   var filteredApplicants = [].obs;
 
-  void toggleApplicant(String name) {
-    if (selectedApplicants.contains(name)) {
-      selectedApplicants.remove(name);
-    } else {
-      selectedApplicants.add(name);
-    }
+  void selectApplicant(String name) {
+    selectedApplicants.value = [name];
   }
 
   void updateSearch(String query) {
