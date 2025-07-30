@@ -2,6 +2,7 @@ import 'package:docuease_admin/custom_widgets/custom_header.dart';
 import 'package:docuease_admin/custom_widgets/revenue_chart.dart';
 import 'package:docuease_admin/screens/chat_screen/controller/chat_controller.dart';
 import 'package:docuease_admin/screens/payment_screen/controller/payment_controller.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -243,15 +244,36 @@ class ChatScreen extends GetView<ChatController> {
                                                                     bottomLeft: Radius.circular(7),
                                                                   ),
                                                                 ),
-                                                                child: Text(
+                                                                child: msg.isDocument
+                                                                    ? GestureDetector(
+                                                                  onTap: () {
+                                                                    // TODO: Handle document open/download
+                                                                  },
+                                                                  child: Row(
+                                                                    mainAxisSize: MainAxisSize.min,
+                                                                    children: [
+                                                                      Icon(Icons.insert_drive_file, color: isSender ? Colors.white : Colors.black),
+                                                                      SizedBox(width: 8),
+                                                                      Flexible(
+                                                                        child: Text(
+                                                                          msg.message,
+                                                                          style: AppStyles.blackTextStyle().copyWith(
+                                                                            color: isSender ? Colors.white : Colors.black,
+                                                                            fontSize: 12,
+                                                                            fontWeight: FontWeight.w600,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                )
+                                                                    : Text(
                                                                   msg.message,
                                                                   style: AppStyles.blackTextStyle().copyWith(
-                                                                    color:
-                                                                    isSender ? Colors.white : Colors.black,
+                                                                    color: isSender ? Colors.white : Colors.black,
                                                                     fontSize: 12,
                                                                   ),
-                                                                ),
-                                                              ),
+                                                                ),                                                              ),
                                                               Text(
                                                                 msg.time,
                                                                 style: AppStyles.blackTextStyle().copyWith(
@@ -286,7 +308,23 @@ class ChatScreen extends GetView<ChatController> {
                                                   border: Border.all(color: kGreyShade4Color)),
                                               child: Row(
                                                 children: [
-                                                  SvgPicture.asset(kLinkIcon, height: 24, width: 24),
+                                                  MouseRegion(
+                                                    cursor: SystemMouseCursors.click,
+                                                    child: GestureDetector(
+                                                      onTap: ()async{
+                                                        final result = await FilePicker.platform.pickFiles(
+                                                          type: FileType.custom,
+                                                          allowedExtensions: ['pdf', 'doc', 'docx'],
+                                                        );
+
+                                                        if (result != null && result.files.isNotEmpty) {
+                                                          final file = result.files.first;
+                                                          controller.selectedFile.value = file;
+                                                          controller.messageController1.text = file.name;
+                                                        }
+                                                      },
+                                                        child: SvgPicture.asset(kLinkIcon, height: 24, width: 24)),
+                                                  ),
                                                   SizedBox(width: 10.w),
                                                   Expanded(
                                                     child: TextField(

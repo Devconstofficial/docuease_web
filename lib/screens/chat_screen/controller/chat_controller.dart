@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
@@ -8,6 +9,7 @@ class ChatController extends GetxController {
   var searchQuery = "".obs;
   var messageController = "".obs;
   var messageController1 = TextEditingController();
+  var selectedFile = Rxn<PlatformFile>();
 
   @override
   void onInit() {
@@ -56,12 +58,29 @@ class ChatController extends GetxController {
 
 
   void sendMessage(String text) {
-    if (text.trim().isEmpty || selectedConversation.value == null) return;
-    selectedConversation.value!.messages.add(
-      ChatMessage(message: text, isSender: true, time: "8:40pm"),
-    );
+    if ((text.trim().isEmpty && selectedFile.value == null) || selectedConversation.value == null) return;
+
+    if (selectedFile.value != null) {
+      selectedConversation.value!.messages.add(
+        ChatMessage(
+          message: selectedFile.value!.name,
+          isSender: true,
+          time: "8:40pm",
+          isDocument: true,
+        ),
+      );
+      selectedFile.value = null;
+    } else {
+      selectedConversation.value!.messages.add(
+        ChatMessage(
+          message: text,
+          isSender: true,
+          time: "8:40pm",
+        ),
+      );
+    }
+
     selectedConversation.refresh();
-    messageController.value = "";
     messageController1.clear();
   }
 
@@ -72,7 +91,19 @@ class ChatController extends GetxController {
     conversations.refresh();
     filteredConversations.refresh();
   }
-}
+
+  void sendDocumentMessage(String fileName) {
+    if (selectedConversation.value == null) return;
+    selectedConversation.value!.messages.add(
+      ChatMessage(
+        message: fileName,
+        isSender: true,
+        time: "8:50pm",
+        isDocument: true,
+      ),
+    );
+    selectedConversation.refresh();
+  }}
 
 class Conversation {
   final String userName;
@@ -92,6 +123,12 @@ class ChatMessage {
   final String message;
   final bool isSender;
   final String time;
+  final bool isDocument;
 
-  ChatMessage({required this.message, required this.isSender, required this.time});
+  ChatMessage({
+    required this.message,
+    required this.isSender,
+    required this.time,
+    this.isDocument = false,
+  });
 }
